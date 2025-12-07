@@ -1,0 +1,36 @@
+{
+  "name": "cluster-guardians",
+  "version": "0.1.0",
+  "description": "A Kubernetes educational RPG game - Story-driven learning with hands-on terminal challenges",
+  "private": true,
+  "workspaces": [
+    "src/frontend",
+    "src/backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd src/frontend && npm run dev",
+    "dev:backend": "cd src/backend && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd src/frontend && npm run build",
+    "build:backend": "cd src/backend && npm run build",
+    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "start:frontend": "cd src/frontend && npm start",
+    "start:backend": "cd src/backend && npm start",
+    "lint": "cd src/frontend && npm run lint",
+    "install:all": "npm install && cd src/frontend && npm install && cd ../backend && npm install"
+  },
+  "keywords": [
+    "kubernetes",
+    "education",
+    "game",
+    "rpg",
+    "learning",
+    "devops"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
