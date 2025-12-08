@@ -1,13 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Home() {
+  const router = useRouter();
   const [isStarting, setIsStarting] = useState(false);
 
   const handleStartGame = () => {
     setIsStarting(true);
-    // Will navigate to game world once implemented
+    router.push("/game");
   };
 
   return (
