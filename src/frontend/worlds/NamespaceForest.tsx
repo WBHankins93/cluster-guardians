@@ -7,7 +7,8 @@ import { Button, Badge, Card, CardHeader, CardTitle, CardContent } from "@/compo
 import { Dialog } from "@/components/dialog";
 import { ClusterStateViewer, QuestTracker } from "@/components/game";
 import { NPCCard } from "@/components/npc";
-import { DialogNode, NPC, Quest } from "@/shared/types/game";
+import { TerminalRift } from "@/components/terminal";
+import { DialogNode, NPC, Quest, TerminalRift as TerminalRiftType } from "@/shared/types/game";
 import {
   namespaceForestWorld,
   kubeSageDialogTree,
@@ -15,6 +16,7 @@ import {
   treantPodDialog,
   serviceGuardianDialog,
 } from "@/shared/data/world1Data";
+import { getAvailableRifts } from "@/shared/data/terminalRiftChallenges";
 
 export default function NamespaceForest() {
   const {
@@ -38,6 +40,14 @@ export default function NamespaceForest() {
   const [showYAMLEditor, setShowYAMLEditor] = useState(false);
   const [commandOutput, setCommandOutput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [availableRifts, setAvailableRifts] = useState<TerminalRiftType[]>([]);
+  const [activeRift, setActiveRift] = useState<TerminalRiftType | null>(null);
+
+  // Update available rifts when quests complete
+  useEffect(() => {
+    const rifts = getAvailableRifts(player.completedQuests);
+    setAvailableRifts(rifts);
+  }, [player.completedQuests]);
 
   // Load cluster state on mount
   useEffect(() => {
@@ -392,8 +402,54 @@ export default function NamespaceForest() {
           </div>
 
           {/* Right Column: Quest Tracker */}
-          <div>
+          <div className="space-y-4">
             <QuestTracker quest={activeQuest} />
+
+            {/* Terminal Rifts */}
+            {availableRifts.some((r) => r.isUnlocked) && (
+              <Card variant="bordered">
+                <CardHeader>
+                  <CardTitle className="text-lg">⚡ Terminal Rifts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {availableRifts.map((rift) => (
+                      <button
+                        key={rift.id}
+                        onClick={() => rift.isUnlocked && setActiveRift(rift)}
+                        disabled={!rift.isUnlocked}
+                        className={`w-full text-left p-3 rounded border transition-all ${
+                          rift.isUnlocked
+                            ? "border-k8s-blue hover:bg-k8s-blue/10 cursor-pointer"
+                            : "border-gray-700 opacity-50 cursor-not-allowed"
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="font-semibold text-sm text-gray-100">
+                              {rift.name}
+                            </div>
+                            <div className="text-xs text-gray-400 mt-1">
+                              {rift.description}
+                            </div>
+                          </div>
+                          {rift.isCompleted && (
+                            <Badge variant="success" size="sm">
+                              ✓
+                            </Badge>
+                          )}
+                          {!rift.isUnlocked && (
+                            <Badge variant="warning" size="sm">
+                              🔒
+                            </Badge>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
 
@@ -407,6 +463,23 @@ export default function NamespaceForest() {
               setActiveNPC(null);
             }}
             npcName={activeNPC?.name}
+          />
+        )}
+
+        {/* Terminal Rift Overlay */}
+        {activeRift && (
+          <TerminalRift
+            challenge={activeRift.challenge}
+            onComplete={(score, timeElapsed) => {
+              gainXP(score);
+              setAvailableRifts(
+                availableRifts.map((r) =>
+                  r.id === activeRift.id ? { ...r, isCompleted: true } : r
+                )
+              );
+              setActiveRift(null);
+            }}
+            onExit={() => setActiveRift(null)}
           />
         )}
       </div>
