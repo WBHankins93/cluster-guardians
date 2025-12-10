@@ -15,9 +15,9 @@ export function Card({
   padding = "md",
 }: CardProps) {
   const variants = {
-    default: "bg-gray-800",
-    bordered: "bg-gray-800 border-2 border-gray-700",
-    elevated: "bg-gray-800 shadow-xl",
+    default: "medieval-card bg-gradient-to-b from-fantasy-stone-dark to-fantasy-stone",
+    bordered: "medieval-card bg-gradient-to-b from-fantasy-stone-dark to-fantasy-stone border-4 border-fantasy-gold/40",
+    elevated: "medieval-card bg-gradient-to-b from-fantasy-stone-dark to-fantasy-stone shadow-medieval-lg",
   };
 
   const paddings = {
@@ -49,7 +49,7 @@ interface CardTitleProps {
 }
 
 export function CardTitle({ children, className }: CardTitleProps) {
-  return <h3 className={clsx("text-xl font-bold text-gray-100", className)}>{children}</h3>;
+  return <h3 className={clsx("text-xl font-bold text-fantasy-gold font-fantasy", className)}>{children}</h3>;
 }
 
 interface CardContentProps {
@@ -58,5 +58,5 @@ interface CardContentProps {
 }
 
 export function CardContent({ children, className }: CardContentProps) {
-  return <div className={clsx("text-gray-300", className)}>{children}</div>;
+  return <div className={clsx("text-fantasy-parchment", className)}>{children}</div>;
 }
