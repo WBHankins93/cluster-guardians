@@ -21,6 +21,7 @@ export function TerminalRift({ challenge, onComplete, onExit }: TerminalRiftProp
   const [commandCount, setCommandCount] = useState(0);
   const [hints, setHints] = useState<string[]>([]);
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
+  const [autoHintShown, setAutoHintShown] = useState(false);
 
   // Timer
   useEffect(() => {
@@ -38,6 +39,21 @@ export function TerminalRift({ challenge, onComplete, onExit }: TerminalRiftProp
 
     return () => clearInterval(interval);
   }, [isActive, isCompleted, timeRemaining]);
+
+  // Auto-show first hint after 30 seconds
+  useEffect(() => {
+    if (isActive && !isCompleted && !autoHintShown && challenge.hints && challenge.hints.length > 0) {
+      const autoHintTimer = setTimeout(() => {
+        if (timeRemaining < challenge.timeLimit - 30) {
+          setHints([challenge.hints[0]]);
+          setCurrentHintIndex(1);
+          setAutoHintShown(true);
+        }
+      }, 30000);
+
+      return () => clearTimeout(autoHintTimer);
+    }
+  }, [isActive, isCompleted, autoHintShown, challenge.hints, timeRemaining, challenge.timeLimit]);
 
   // Start challenge
   const handleStart = async () => {
@@ -129,10 +145,10 @@ export function TerminalRift({ challenge, onComplete, onExit }: TerminalRiftProp
     onComplete(score, timeElapsed);
   };
 
-  // Calculate score based on time and commands
+  // Calculate score based on time and commands (hints are now free)
   const calculateScore = (): number => {
     const timeBonus = Math.floor((timeRemaining / challenge.timeLimit) * 50);
-    const commandPenalty = Math.max(0, (commandCount - 3) * 5); // Penalty for inefficiency
+    const commandPenalty = Math.max(0, (commandCount - 5) * 3); // Reduced penalty, more lenient
     const baseScore = isCompleted ? 100 : 0;
 
     return Math.max(0, baseScore + timeBonus - commandPenalty);
@@ -229,10 +245,13 @@ export function TerminalRift({ challenge, onComplete, onExit }: TerminalRiftProp
                     Ready to Enter the Terminal Rift?
                   </h3>
                   <p className="text-gray-400">
-                    You have {challenge.timeLimit} seconds to complete this challenge.
+                    You have {Math.floor(challenge.timeLimit / 60)} minutes to complete this challenge.
                   </p>
                   <p className="text-gray-500 text-sm mt-2">
-                    Use real kubectl commands to solve the problem. Faster completion = higher score!
+                    Use real kubectl commands to solve the problem. Hints are free and will appear automatically after 30 seconds!
+                  </p>
+                  <p className="text-gray-400 text-xs mt-1">
+                    💡 First hint will appear automatically after 30 seconds if you need help
                   </p>
                 </div>
                 <Button onClick={handleStart} size="lg">
@@ -258,7 +277,7 @@ export function TerminalRift({ challenge, onComplete, onExit }: TerminalRiftProp
                     onClick={showHint}
                     disabled={currentHintIndex >= (challenge.hints?.length || 0)}
                   >
-                    Show Hint (-10 points)
+                    Show Next Hint (Free)
                   </Button>
                 </div>
                 {hints.map((hint, index) => (

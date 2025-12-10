@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useGameStore } from "@/lib/store";
 import { api } from "@/lib/api";
-import { Button, Badge, Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
+import { Button, Badge, Card, CardHeader, CardTitle, CardContent, HelpIcon } from "@/components/ui";
 import { Dialog } from "@/components/dialog";
 import { ClusterStateViewer, QuestTracker } from "@/components/game";
 import { NPCCard } from "@/components/npc";
@@ -12,6 +12,7 @@ import { OnboardingTutorial } from "@/components/tutorial";
 import { HelpPanel } from "@/components/help";
 import { YAMLEditor } from "@/components/yaml";
 import { QuestHints } from "@/components/quest";
+import { CommandInput, CommandHistory } from "@/components/command";
 import { DialogNode, NPC, Quest, TerminalRift as TerminalRiftType } from "@/shared/types/game";
 import {
   namespaceForestWorld,
@@ -49,6 +50,7 @@ export default function NamespaceForest() {
   const [activeRift, setActiveRift] = useState<TerminalRiftType | null>(null);
   const [showTutorial, setShowTutorial] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
 
   // Update available rifts when quests complete
   useEffect(() => {
@@ -155,6 +157,13 @@ export default function NamespaceForest() {
 
   // Execute kubectl command
   const executeCommand = async (command: string) => {
+    // Add to history
+    setCommandHistory((prev) => {
+      const newHistory = [...prev, command];
+      // Keep only last 50 commands
+      return newHistory.slice(-50);
+    });
+
     setIsLoading(true);
     setErrorDetails(null);
     try {
@@ -347,7 +356,10 @@ export default function NamespaceForest() {
             {/* NPCs */}
             <Card variant="bordered">
               <CardHeader>
-                <CardTitle>Characters</CardTitle>
+                <div className="flex items-center space-x-2">
+                  <CardTitle>Characters</CardTitle>
+                  <HelpIcon content="Click on NPCs to talk to them. They'll give you quests and helpful information about problems in the cluster." />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -368,7 +380,10 @@ export default function NamespaceForest() {
             {/* Command Interface */}
             <Card variant="bordered">
               <CardHeader>
-                <CardTitle>kubectl Interface</CardTitle>
+                <div className="flex items-center space-x-2">
+                  <CardTitle>kubectl Interface</CardTitle>
+                  <HelpIcon content="Use kubectl commands to interact with your cluster. Click buttons for quick commands or type custom commands with autocomplete." />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -409,25 +424,22 @@ export default function NamespaceForest() {
                     </Button>
                   </div>
                   
-                  {/* Command input field */}
+                  {/* Enhanced Command Input */}
                   <div className="space-y-2">
-                    <div className="text-xs text-gray-400">
-                      Or type a custom kubectl command:
-                    </div>
-                    <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        placeholder="kubectl describe pod <name> -n forest"
-                        className="flex-1 px-3 py-2 bg-gray-800 text-gray-100 font-mono text-sm rounded border border-gray-700 focus:border-k8s-blue focus:outline-none"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                            executeCommand(e.currentTarget.value.trim());
-                            e.currentTarget.value = "";
-                          }
-                        }}
-                        disabled={isLoading}
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-gray-400">
+                        Type a kubectl command (with autocomplete):
+                      </div>
+                      <CommandHistory
+                        history={commandHistory}
+                        onSelectCommand={executeCommand}
                       />
                     </div>
+                    <CommandInput
+                      onExecute={executeCommand}
+                      isLoading={isLoading}
+                      placeholder="kubectl get pods -n forest"
+                    />
                   </div>
 
                   {showYAMLEditor && (
@@ -504,12 +516,17 @@ export default function NamespaceForest() {
             </Card>
 
             {/* Cluster State Viewer */}
-            <ClusterStateViewer
-              clusterState={clusterState}
-              onResourceClick={(type, name, namespace) => {
-                executeCommand(`kubectl describe ${type} ${name} -n ${namespace}`);
-              }}
-            />
+            <div>
+              <div className="mb-2 flex items-center space-x-2">
+                <HelpIcon content="Click on any resource (pod, service, etc.) to automatically run 'kubectl describe' on it." />
+              </div>
+              <ClusterStateViewer
+                clusterState={clusterState}
+                onResourceClick={(type, name, namespace) => {
+                  executeCommand(`kubectl describe ${type} ${name} -n ${namespace}`);
+                }}
+              />
+            </div>
           </div>
 
           {/* Right Column: Quest Tracker */}

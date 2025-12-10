@@ -15,7 +15,7 @@ export const world1TerminalRifts: TerminalRift[] = [
     challenge: {
       type: "fix-crashloop",
       description: "A pod is crashing repeatedly. Find the error in the logs and apply a fix.",
-      timeLimit: 90, // 1.5 minutes
+      timeLimit: 180, // 3 minutes (increased from 90s)
       initialState: {
         scenarioId: "world1-quest2", // Loads the crashloop scenario
       },
@@ -40,7 +40,7 @@ export const world1TerminalRifts: TerminalRift[] = [
     challenge: {
       type: "debug-selector",
       description: "A service has 0 endpoints. Match the labels to restore traffic flow.",
-      timeLimit: 120, // 2 minutes
+      timeLimit: 240, // 4 minutes (increased from 120s)
       initialState: {
         scenarioId: "world1-quest3",
       },
@@ -65,7 +65,7 @@ export const world1TerminalRifts: TerminalRift[] = [
     challenge: {
       type: "fix-crashloop",
       description: "A pod is pending in a non-existent namespace. Move it to 'forest' namespace.",
-      timeLimit: 60, // 1 minute
+      timeLimit: 120, // 2 minutes (increased from 60s)
       initialState: {
         scenarioId: "world1-quest1",
       },
