@@ -156,8 +156,8 @@ export function YAMLEditor({
               <strong>Quick Reference:</strong> Make sure your YAML has:
               <ul className="list-disc list-inside mt-1 space-y-1">
                 <li>Correct indentation (use spaces, not tabs)</li>
-                <li>Valid namespace (use 'forest' or 'default')</li>
-                <li>Valid image names (e.g., 'nginx:latest', 'busybox:latest')</li>
+                <li>Valid namespace (use &apos;forest&apos; or &apos;default&apos;)</li>
+                <li>Valid image names (e.g., &apos;nginx:latest&apos;, &apos;busybox:latest&apos;)</li>
                 <li>Matching labels between pods and services</li>
               </ul>
             </div>

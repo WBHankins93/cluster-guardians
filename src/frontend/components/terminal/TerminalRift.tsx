@@ -47,10 +47,11 @@ export function TerminalRift({ challenge, onComplete, onExit }: TerminalRiftProp
       const settings = getSettings();
       const delay = settings.easyMode ? 15000 : 30000;
       const timeThreshold = settings.easyMode ? 15 : 30;
+      const firstHint = challenge.hints[0];
       
       const autoHintTimer = setTimeout(() => {
-        if (timeRemaining < challenge.timeLimit - timeThreshold) {
-          setHints([challenge.hints[0]]);
+        if (timeRemaining < challenge.timeLimit - timeThreshold && firstHint) {
+          setHints([firstHint]);
           setCurrentHintIndex(1);
           setAutoHintShown(true);
         }
