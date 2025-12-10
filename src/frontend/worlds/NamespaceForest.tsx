@@ -55,7 +55,7 @@ export default function NamespaceForest() {
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
-  const [easyMode, setEasyMode] = useState(getSettings().easyMode);
+  const [easyMode, setEasyMode] = useState(false);
 
   // Update available rifts when quests complete
   useEffect(() => {
@@ -63,8 +63,10 @@ export default function NamespaceForest() {
     setAvailableRifts(rifts);
   }, [player.completedQuests]);
 
-  // Check if tutorial should be shown
+  // Check if tutorial should be shown and load settings
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    
     const settings = getSettings();
     setEasyMode(settings.easyMode);
     
