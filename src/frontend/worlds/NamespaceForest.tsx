@@ -8,6 +8,10 @@ import { Dialog } from "@/components/dialog";
 import { ClusterStateViewer, QuestTracker } from "@/components/game";
 import { NPCCard } from "@/components/npc";
 import { TerminalRift } from "@/components/terminal";
+import { OnboardingTutorial } from "@/components/tutorial";
+import { HelpPanel } from "@/components/help";
+import { YAMLEditor } from "@/components/yaml";
+import { QuestHints } from "@/components/quest";
 import { DialogNode, NPC, Quest, TerminalRift as TerminalRiftType } from "@/shared/types/game";
 import {
   namespaceForestWorld,
@@ -17,6 +21,7 @@ import {
   serviceGuardianDialog,
 } from "@/shared/data/world1Data";
 import { getAvailableRifts } from "@/shared/data/terminalRiftChallenges";
+import { formatError } from "@/lib/errorTranslator";
 
 export default function NamespaceForest() {
   const {
@@ -36,18 +41,28 @@ export default function NamespaceForest() {
   const [npcs] = useState(namespaceForestWorld.npcs);
   const [quests] = useState(namespaceForestWorld.quests);
   const [activeNPC, setActiveNPC] = useState<NPC | null>(null);
-  const [yamlEditor, setYAMLEditor] = useState("");
   const [showYAMLEditor, setShowYAMLEditor] = useState(false);
   const [commandOutput, setCommandOutput] = useState("");
+  const [errorDetails, setErrorDetails] = useState<ReturnType<typeof formatError> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [availableRifts, setAvailableRifts] = useState<TerminalRiftType[]>([]);
   const [activeRift, setActiveRift] = useState<TerminalRiftType | null>(null);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Update available rifts when quests complete
   useEffect(() => {
     const rifts = getAvailableRifts(player.completedQuests);
     setAvailableRifts(rifts);
   }, [player.completedQuests]);
+
+  // Check if tutorial should be shown
+  useEffect(() => {
+    const tutorialCompleted = localStorage.getItem("cluster-guardians-tutorial-completed");
+    if (!tutorialCompleted) {
+      setShowTutorial(true);
+    }
+  }, []);
 
   // Load cluster state on mount
   useEffect(() => {
@@ -141,9 +156,19 @@ export default function NamespaceForest() {
   // Execute kubectl command
   const executeCommand = async (command: string) => {
     setIsLoading(true);
+    setErrorDetails(null);
     try {
       const result = await api.executeKubectl(command);
-      setCommandOutput(result.output);
+      
+      if (result.exitCode !== 0) {
+        // Translate error to friendly message
+        const formatted = formatError(result.output);
+        setErrorDetails(formatted);
+        setCommandOutput(result.output);
+      } else {
+        setCommandOutput(result.output);
+        setErrorDetails(null);
+      }
 
       // Check if command advances quest objectives
       if (activeQuest) {
@@ -152,25 +177,29 @@ export default function NamespaceForest() {
 
       await loadClusterState();
     } catch (error) {
-      setCommandOutput(`Error: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const formatted = formatError(errorMessage);
+      setErrorDetails(formatted);
+      setCommandOutput(`Error: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   // Apply YAML
-  const applyYAML = async () => {
-    if (!yamlEditor.trim()) {
+  const applyYAML = async (yaml: string) => {
+    if (!yaml.trim()) {
       setCommandOutput("Error: No YAML provided");
       return;
     }
 
     setIsLoading(true);
+    setErrorDetails(null);
     try {
-      const result = await api.applyYAML(yamlEditor);
+      const result = await api.applyYAML(yaml);
       setCommandOutput(result.message);
       setShowYAMLEditor(false);
-      setYAMLEditor("");
+      setErrorDetails(null);
 
       // Check if this completes any quest objectives
       await loadClusterState();
@@ -179,7 +208,10 @@ export default function NamespaceForest() {
         setTimeout(() => checkQuestCompletion(), 1000);
       }
     } catch (error: any) {
-      setCommandOutput(`Error: ${error.message}`);
+      const errorMessage = error.message || String(error);
+      const formatted = formatError(errorMessage);
+      setErrorDetails(formatted);
+      setCommandOutput(`Error: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -291,6 +323,14 @@ export default function NamespaceForest() {
             <p className="text-gray-400">World 1 - Learn namespaces, pods, and basic YAML</p>
           </div>
           <div className="flex items-center space-x-4">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowHelp(true)}
+              title="Open Help Panel"
+            >
+              📖 Help
+            </Button>
             <Badge variant="info">
               Level {player.level}
             </Badge>
@@ -332,12 +372,13 @@ export default function NamespaceForest() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex space-x-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       size="sm"
                       variant="secondary"
                       onClick={() => executeCommand("kubectl get pods -n forest")}
                       disabled={isLoading}
+                      title="Runs: kubectl get pods -n forest"
                     >
                       Get Pods
                     </Button>
@@ -346,46 +387,116 @@ export default function NamespaceForest() {
                       variant="secondary"
                       onClick={() => executeCommand("kubectl get services -n forest")}
                       disabled={isLoading}
+                      title="Runs: kubectl get services -n forest"
                     >
                       Get Services
                     </Button>
                     <Button
                       size="sm"
                       variant="secondary"
+                      onClick={() => executeCommand("kubectl get namespaces")}
+                      disabled={isLoading}
+                      title="Runs: kubectl get namespaces"
+                    >
+                      Get Namespaces
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
                       onClick={() => setShowYAMLEditor(!showYAMLEditor)}
                     >
-                      Apply YAML
+                      {showYAMLEditor ? "Hide YAML Editor" : "Apply YAML"}
                     </Button>
+                  </div>
+                  
+                  {/* Command input field */}
+                  <div className="space-y-2">
+                    <div className="text-xs text-gray-400">
+                      Or type a custom kubectl command:
+                    </div>
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        placeholder="kubectl describe pod <name> -n forest"
+                        className="flex-1 px-3 py-2 bg-gray-800 text-gray-100 font-mono text-sm rounded border border-gray-700 focus:border-k8s-blue focus:outline-none"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                            executeCommand(e.currentTarget.value.trim());
+                            e.currentTarget.value = "";
+                          }
+                        }}
+                        disabled={isLoading}
+                      />
+                    </div>
                   </div>
 
                   {showYAMLEditor && (
-                    <div className="space-y-2">
-                      <textarea
-                        value={yamlEditor}
-                        onChange={(e) => setYAMLEditor(e.target.value)}
-                        placeholder="Paste your YAML here..."
-                        className="w-full h-48 p-3 bg-gray-800 text-gray-100 font-mono text-sm rounded border border-gray-700 focus:border-k8s-blue focus:outline-none"
-                      />
-                      <div className="flex space-x-2">
-                        <Button onClick={applyYAML} disabled={isLoading}>
-                          Apply
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          onClick={() => {
-                            setShowYAMLEditor(false);
-                            setYAMLEditor("");
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
+                    <YAMLEditor
+                      questId={activeQuest?.id}
+                      onApply={applyYAML}
+                      onCancel={() => setShowYAMLEditor(false)}
+                      isLoading={isLoading}
+                    />
                   )}
 
                   {commandOutput && (
-                    <div className="bg-gray-800 p-3 rounded font-mono text-sm text-gray-300 whitespace-pre-wrap max-h-48 overflow-y-auto terminal-scrollbar">
-                      {commandOutput}
+                    <div className="space-y-2">
+                      <div className="bg-gray-800 p-3 rounded font-mono text-sm text-gray-300 whitespace-pre-wrap max-h-48 overflow-y-auto terminal-scrollbar">
+                        {commandOutput}
+                      </div>
+                      
+                      {/* Friendly error display */}
+                      {errorDetails?.friendly && (
+                        <Card variant="bordered" className="bg-red-500/10 border-red-500/30">
+                          <CardHeader>
+                            <CardTitle className="text-lg text-red-300">
+                              ⚠️ {errorDetails.friendly.title}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              <p className="text-sm text-gray-200">
+                                {errorDetails.friendly.message}
+                              </p>
+                              
+                              {errorDetails.friendly.suggestions.length > 0 && (
+                                <div>
+                                  <div className="text-xs font-semibold text-gray-400 mb-2">
+                                    Suggestions:
+                                  </div>
+                                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+                                    {errorDetails.friendly.suggestions.map((suggestion, index) => (
+                                      <li key={index}>{suggestion}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {errorDetails.friendly.exampleCommand && (
+                                <div>
+                                  <div className="text-xs font-semibold text-gray-400 mb-1">
+                                    Example Command:
+                                  </div>
+                                  <div className="bg-gray-900 p-2 rounded font-mono text-xs text-k8s-blue-light border border-gray-700">
+                                    {errorDetails.friendly.exampleCommand}
+                                  </div>
+                                </div>
+                              )}
+
+                              {errorDetails.friendly.exampleYaml && (
+                                <div>
+                                  <div className="text-xs font-semibold text-gray-400 mb-1">
+                                    Example YAML:
+                                  </div>
+                                  <pre className="bg-gray-900 p-2 rounded font-mono text-xs text-gray-300 border border-gray-700 overflow-x-auto">
+                                    {errorDetails.friendly.exampleYaml}
+                                  </pre>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
                     </div>
                   )}
                 </div>
@@ -404,6 +515,38 @@ export default function NamespaceForest() {
           {/* Right Column: Quest Tracker */}
           <div className="space-y-4">
             <QuestTracker quest={activeQuest} />
+            
+            {/* Quest Hints */}
+            {activeQuest && (
+              <Card variant="bordered">
+                <CardHeader>
+                  <CardTitle className="text-lg">💡 Quest Hints</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {activeQuest.objectives.map((objective) => (
+                      <div key={objective.id}>
+                        <div className="text-sm font-semibold text-gray-300 mb-1">
+                          {objective.isCompleted ? (
+                            <span className="line-through text-gray-500">
+                              {objective.description}
+                            </span>
+                          ) : (
+                            objective.description
+                          )}
+                        </div>
+                        {!objective.isCompleted && (
+                          <QuestHints
+                            objective={objective}
+                            onShowHint={() => {}}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Terminal Rifts */}
             {availableRifts.some((r) => r.isUnlocked) && (
@@ -482,6 +625,17 @@ export default function NamespaceForest() {
             onExit={() => setActiveRift(null)}
           />
         )}
+
+        {/* Onboarding Tutorial */}
+        {showTutorial && (
+          <OnboardingTutorial
+            onComplete={() => setShowTutorial(false)}
+            onSkip={() => setShowTutorial(false)}
+          />
+        )}
+
+        {/* Help Panel */}
+        <HelpPanel isOpen={showHelp} onClose={() => setShowHelp(false)} />
       </div>
     </div>
   );
