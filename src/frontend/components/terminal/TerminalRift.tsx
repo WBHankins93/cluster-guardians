@@ -6,6 +6,7 @@ import { Button, Badge, Card, CardHeader, CardTitle, CardContent } from "@/compo
 import { api } from "@/lib/api";
 import { useGameStore } from "@/lib/store";
 import { TerminalChallenge } from "@/shared/types/game";
+import { getSettings } from "@/lib/settings";
 
 interface TerminalRiftProps {
   challenge: TerminalChallenge;
@@ -40,16 +41,20 @@ export function TerminalRift({ challenge, onComplete, onExit }: TerminalRiftProp
     return () => clearInterval(interval);
   }, [isActive, isCompleted, timeRemaining]);
 
-  // Auto-show first hint after 30 seconds
+  // Auto-show first hint (15s in Easy Mode, 30s otherwise)
   useEffect(() => {
     if (isActive && !isCompleted && !autoHintShown && challenge.hints && challenge.hints.length > 0) {
+      const settings = getSettings();
+      const delay = settings.easyMode ? 15000 : 30000;
+      const timeThreshold = settings.easyMode ? 15 : 30;
+      
       const autoHintTimer = setTimeout(() => {
-        if (timeRemaining < challenge.timeLimit - 30) {
+        if (timeRemaining < challenge.timeLimit - timeThreshold) {
           setHints([challenge.hints[0]]);
           setCurrentHintIndex(1);
           setAutoHintShown(true);
         }
-      }, 30000);
+      }, delay);
 
       return () => clearTimeout(autoHintTimer);
     }
@@ -147,8 +152,12 @@ export function TerminalRift({ challenge, onComplete, onExit }: TerminalRiftProp
 
   // Calculate score based on time and commands (hints are now free)
   const calculateScore = (): number => {
+    const settings = getSettings();
     const timeBonus = Math.floor((timeRemaining / challenge.timeLimit) * 50);
-    const commandPenalty = Math.max(0, (commandCount - 5) * 3); // Reduced penalty, more lenient
+    // More lenient penalty in Easy Mode
+    const penaltyMultiplier = settings.easyMode ? 2 : 3;
+    const commandThreshold = settings.easyMode ? 7 : 5;
+    const commandPenalty = Math.max(0, (commandCount - commandThreshold) * penaltyMultiplier);
     const baseScore = isCompleted ? 100 : 0;
 
     return Math.max(0, baseScore + timeBonus - commandPenalty);

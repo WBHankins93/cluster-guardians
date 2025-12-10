@@ -10,9 +10,11 @@ import { NPCCard } from "@/components/npc";
 import { TerminalRift } from "@/components/terminal";
 import { OnboardingTutorial } from "@/components/tutorial";
 import { HelpPanel } from "@/components/help";
-import { YAMLEditor } from "@/components/yaml";
+import { YAMLEditor, YAMLBuilder } from "@/components/yaml";
 import { QuestHints } from "@/components/quest";
 import { CommandInput, CommandHistory } from "@/components/command";
+import { SettingsPanel } from "@/components/settings";
+import { getSettings } from "@/lib/settings";
 import { DialogNode, NPC, Quest, TerminalRift as TerminalRiftType } from "@/shared/types/game";
 import {
   namespaceForestWorld,
@@ -43,6 +45,7 @@ export default function NamespaceForest() {
   const [quests] = useState(namespaceForestWorld.quests);
   const [activeNPC, setActiveNPC] = useState<NPC | null>(null);
   const [showYAMLEditor, setShowYAMLEditor] = useState(false);
+  const [showYAMLBuilder, setShowYAMLBuilder] = useState(false);
   const [commandOutput, setCommandOutput] = useState("");
   const [errorDetails, setErrorDetails] = useState<ReturnType<typeof formatError> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +53,9 @@ export default function NamespaceForest() {
   const [activeRift, setActiveRift] = useState<TerminalRiftType | null>(null);
   const [showTutorial, setShowTutorial] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [easyMode, setEasyMode] = useState(getSettings().easyMode);
 
   // Update available rifts when quests complete
   useEffect(() => {
@@ -60,11 +65,14 @@ export default function NamespaceForest() {
 
   // Check if tutorial should be shown
   useEffect(() => {
+    const settings = getSettings();
+    setEasyMode(settings.easyMode);
+    
     const tutorialCompleted = localStorage.getItem("cluster-guardians-tutorial-completed");
-    if (!tutorialCompleted) {
+    if (!tutorialCompleted && settings.showTutorials) {
       setShowTutorial(true);
     }
-  }, []);
+  }, [showSettings]);
 
   // Load cluster state on mount
   useEffect(() => {
@@ -340,6 +348,19 @@ export default function NamespaceForest() {
             >
               📖 Help
             </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowSettings(true)}
+              title="Open Settings"
+            >
+              ⚙️ Settings
+            </Button>
+            {easyMode && (
+              <Badge variant="success" size="sm">
+                Easy Mode
+              </Badge>
+            )}
             <Badge variant="info">
               Level {player.level}
             </Badge>
@@ -420,7 +441,15 @@ export default function NamespaceForest() {
                       variant="secondary"
                       onClick={() => setShowYAMLEditor(!showYAMLEditor)}
                     >
-                      {showYAMLEditor ? "Hide YAML Editor" : "Apply YAML"}
+                      {showYAMLEditor ? "Hide Editor" : "Edit YAML"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setShowYAMLBuilder(!showYAMLBuilder)}
+                      title="Visual YAML builder - no coding required!"
+                    >
+                      {showYAMLBuilder ? "Hide Builder" : "Build YAML"}
                     </Button>
                   </div>
                   
@@ -441,6 +470,20 @@ export default function NamespaceForest() {
                       placeholder="kubectl get pods -n forest"
                     />
                   </div>
+
+                  {showYAMLBuilder && (
+                    <YAMLBuilder
+                      onGenerate={(yaml) => {
+                        // Switch to editor with generated YAML
+                        setShowYAMLBuilder(false);
+                        setShowYAMLEditor(true);
+                        // The YAMLEditor will load templates, so we'll pass it via a different method
+                        // For now, just show a message
+                        setCommandOutput(`YAML generated! Switch to "Edit YAML" to review and apply it.\n\n${yaml}`);
+                      }}
+                      onCancel={() => setShowYAMLBuilder(false)}
+                    />
+                  )}
 
                   {showYAMLEditor && (
                     <YAMLEditor
@@ -653,6 +696,16 @@ export default function NamespaceForest() {
 
         {/* Help Panel */}
         <HelpPanel isOpen={showHelp} onClose={() => setShowHelp(false)} />
+
+        {/* Settings Panel */}
+        <SettingsPanel
+          isOpen={showSettings}
+          onClose={() => {
+            setShowSettings(false);
+            // Refresh easy mode state
+            setEasyMode(getSettings().easyMode);
+          }}
+        />
       </div>
     </div>
   );

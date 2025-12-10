@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge } from "@/components/ui";
 import { QuestObjective } from "@/shared/types/game";
 import { getHintsForObjective } from "@/shared/data/questHints";
+import { getSettings } from "@/lib/settings";
 
 interface QuestHintsProps {
   objective: QuestObjective;
@@ -36,6 +37,20 @@ export function QuestHints({ objective, onShowHint }: QuestHintsProps) {
       setCurrentHintIndex(currentHintIndex - 1);
     }
   };
+
+  const settings = getSettings();
+  const shouldAutoShow = settings.easyMode && settings.autoShowHints && !showHints;
+
+  // Auto-show hints in Easy Mode
+  useEffect(() => {
+    if (shouldAutoShow) {
+      const timer = setTimeout(() => {
+        handleShowHints();
+      }, 5000); // Show after 5 seconds in Easy Mode
+
+      return () => clearTimeout(timer);
+    }
+  }, [shouldAutoShow]);
 
   if (!hintData || hints.length === 0) {
     return null;

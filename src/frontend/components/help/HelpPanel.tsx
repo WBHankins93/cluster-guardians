@@ -15,13 +15,46 @@ const helpSections: HelpSection[] = [
     id: "kubectl-basics",
     title: "kubectl Command Basics",
     content:
-      "kubectl is the command-line interface for Kubernetes. Here are the most common commands you'll use:",
+      "kubectl is the command-line interface for Kubernetes. Here are the most common commands you'll use:\n\n" +
+      "GET - View resources:\n" +
+      "  kubectl get <resource> -n <namespace>\n" +
+      "  Examples: pods, services, deployments, namespaces\n\n" +
+      "DESCRIBE - Get detailed information:\n" +
+      "  kubectl describe <resource> <name> -n <namespace>\n" +
+      "  Shows labels, status, events, and more\n\n" +
+      "LOGS - View container logs:\n" +
+      "  kubectl logs <pod-name> -n <namespace>\n" +
+      "  Essential for debugging crashes\n\n" +
+      "APPLY - Apply YAML configuration:\n" +
+      "  Use the 'Apply YAML' button in the game interface",
     examples: [
       "kubectl get pods -n forest",
       "kubectl describe pod lost-pod -n forest",
       "kubectl logs treant-pod -n forest",
       "kubectl get services -n forest",
+      "kubectl get namespaces",
     ],
+  },
+  {
+    id: "kubectl-cheatsheet",
+    title: "kubectl Cheat Sheet",
+    content:
+      "Quick reference for common kubectl commands:\n\n" +
+      "RESOURCE INSPECTION:\n" +
+      "  kubectl get pods -n <namespace>\n" +
+      "  kubectl get services -n <namespace>\n" +
+      "  kubectl get deployments -n <namespace>\n" +
+      "  kubectl get namespaces\n\n" +
+      "DETAILED INFORMATION:\n" +
+      "  kubectl describe pod <name> -n <namespace>\n" +
+      "  kubectl describe service <name> -n <namespace>\n\n" +
+      "DEBUGGING:\n" +
+      "  kubectl logs <pod-name> -n <namespace>\n" +
+      "  kubectl get events -n <namespace>\n\n" +
+      "YAML OPERATIONS:\n" +
+      "  Use 'Apply YAML' button to apply configurations\n" +
+      "  Templates are provided for each quest",
+    examples: [],
   },
   {
     id: "yaml-structure",
@@ -56,7 +89,29 @@ const helpSections: HelpSection[] = [
       "3. Use 'kubectl describe' to see detailed information\n" +
       "4. Check logs if a pod is crashing\n" +
       "5. Use the YAML templates provided - don't start from scratch\n" +
-      "6. Click resources in the Cluster State viewer for quick commands",
+      "6. Click resources in the Cluster State viewer for quick commands\n" +
+      "7. Use quest hints if you're stuck\n" +
+      "8. Enable Easy Mode in settings for extra help",
+  },
+  {
+    id: "kubernetes-concepts",
+    title: "Kubernetes Concepts",
+    content:
+      "PODS:\n" +
+      "  The smallest deployable unit. Contains one or more containers.\n" +
+      "  Statuses: Pending, Running, CrashLoopBackOff, Failed\n\n" +
+      "NAMESPACES:\n" +
+      "  Logical separation of resources. Like folders for your cluster.\n" +
+      "  Common namespaces: default, kube-system, forest (in this game)\n\n" +
+      "SERVICES:\n" +
+      "  Provides stable network access to pods.\n" +
+      "  Uses label selectors to find matching pods.\n" +
+      "  Types: ClusterIP, NodePort, LoadBalancer\n\n" +
+      "LABELS & SELECTORS:\n" +
+      "  Labels are key-value pairs attached to resources.\n" +
+      "  Selectors match resources by their labels.\n" +
+      "  Service selectors must match pod labels exactly!",
+    examples: [],
   },
 ];
 
