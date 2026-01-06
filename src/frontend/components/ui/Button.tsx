@@ -2,9 +2,10 @@ import { ButtonHTMLAttributes, ReactNode } from "react";
 import clsx from "clsx";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "danger" | "ghost";
+  variant?: "primary" | "secondary" | "danger" | "ghost" | "outline";
   size?: "sm" | "md" | "lg";
   children: ReactNode;
+  glow?: boolean;
 }
 
 export function Button({
@@ -13,18 +14,23 @@ export function Button({
   className,
   children,
   disabled,
+  glow = false,
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed medieval-button relative overflow-hidden border-2";
+    "font-mono font-semibold rounded transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cyber-button relative overflow-hidden border";
 
   const variants = {
-    primary: "bg-gradient-to-r from-k8s-blue to-k8s-blue-dark hover:from-k8s-blue-light hover:to-k8s-blue text-white border-fantasy-gold/50 hover:border-fantasy-gold shadow-medieval hover:shadow-glow disabled:hover:from-k8s-blue disabled:hover:to-k8s-blue",
+    primary:
+      "bg-terminal-green/10 hover:bg-terminal-green/20 text-terminal-green border-terminal-green/50 hover:border-terminal-green hover:shadow-glow-green disabled:hover:bg-terminal-green/10 disabled:hover:border-terminal-green/50",
     secondary:
-      "bg-gradient-to-r from-fantasy-bronze/40 to-fantasy-stone-dark/60 hover:from-fantasy-bronze/60 hover:to-fantasy-stone-dark/80 text-fantasy-parchment border-fantasy-gold/40 hover:border-fantasy-gold/70 shadow-medieval disabled:hover:from-fantasy-bronze/40 disabled:hover:to-fantasy-stone-dark/60",
-    danger: "bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white border-red-500/50 hover:border-red-400 shadow-medieval disabled:hover:from-red-700 disabled:hover:to-red-800",
+      "bg-terminal-panel hover:bg-terminal-border/50 text-terminal-white border-terminal-border hover:border-terminal-cyan/50 disabled:hover:bg-terminal-panel",
+    danger:
+      "bg-terminal-red/10 hover:bg-terminal-red/20 text-terminal-red border-terminal-red/50 hover:border-terminal-red hover:shadow-glow-red disabled:hover:bg-terminal-red/10",
     ghost:
-      "bg-transparent/20 hover:bg-fantasy-stone-dark/40 text-fantasy-parchment border-fantasy-gold/30 hover:border-fantasy-gold/50 shadow-medieval disabled:hover:bg-transparent/20",
+      "bg-transparent hover:bg-terminal-green/10 text-terminal-green/70 hover:text-terminal-green border-transparent hover:border-terminal-green/30 disabled:hover:bg-transparent",
+    outline:
+      "bg-transparent hover:bg-terminal-cyan/10 text-terminal-cyan border-terminal-cyan/50 hover:border-terminal-cyan hover:shadow-glow-cyan disabled:hover:bg-transparent",
   };
 
   const sizes = {
@@ -33,9 +39,11 @@ export function Button({
     lg: "px-6 py-3 text-lg",
   };
 
+  const glowStyles = glow ? "animate-pulse-glow" : "";
+
   return (
     <button
-      className={clsx(baseStyles, variants[variant], sizes[size], className)}
+      className={clsx(baseStyles, variants[variant], sizes[size], glowStyles, className)}
       disabled={disabled}
       {...props}
     >

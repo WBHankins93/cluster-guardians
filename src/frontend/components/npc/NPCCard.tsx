@@ -12,41 +12,39 @@ export function NPCCard({ npc, onInteract, hasQuestIndicator = false }: NPCCardP
   return (
     <button
       onClick={onInteract}
-      className="relative group transition-transform hover:scale-105"
+      className="relative group transition-all duration-200 hover:scale-105 w-full"
     >
-      <Card variant="bordered" padding="sm" className="hover:border-k8s-blue transition-all">
-        <CardContent>
-          <div className="flex flex-col items-center text-center space-y-2">
-            {/* Quest Indicator */}
-            {hasQuestIndicator && (
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-xs font-bold animate-bounce">
-                !
-              </div>
+      <div className="cyber-card p-3 border border-terminal-green/20 hover:border-terminal-cyan transition-all rounded-lg">
+        <div className="flex flex-col items-center text-center space-y-2">
+          {/* Quest Indicator */}
+          {hasQuestIndicator && (
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-terminal-amber rounded-full flex items-center justify-center text-xs font-bold font-mono animate-pulse shadow-glow-green text-terminal-black">
+              !
+            </div>
+          )}
+
+          {/* Avatar */}
+          <NPCAvatar type={npc.type} name={npc.name} />
+
+          {/* Name */}
+          <div>
+            <div className="font-bold text-terminal-white font-mono text-sm">{npc.name}</div>
+            {npc.k8sRepresents && (
+              <div className="text-xs text-terminal-cyan/70 mt-1 font-mono">{npc.k8sRepresents}</div>
             )}
-
-            {/* Avatar */}
-            <NPCAvatar type={npc.type} name={npc.name} />
-
-            {/* Name */}
-            <div>
-              <div className="font-bold text-gray-100">{npc.name}</div>
-              {npc.k8sRepresents && (
-                <div className="text-xs text-gray-500 mt-1">{npc.k8sRepresents}</div>
-              )}
-            </div>
-
-            {/* Type Badge */}
-            <Badge variant="info" size="sm">
-              {npc.type}
-            </Badge>
-
-            {/* Hover hint */}
-            <div className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-              Click to interact
-            </div>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Type Badge */}
+          <Badge variant="purple" size="sm">
+            {npc.type}
+          </Badge>
+
+          {/* Hover hint */}
+          <div className="text-xs text-terminal-green/50 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
+            [INTERACT]
+          </div>
+        </div>
+      </div>
     </button>
   );
 }

@@ -4,8 +4,9 @@ import clsx from "clsx";
 interface CardProps {
   children: ReactNode;
   className?: string;
-  variant?: "default" | "bordered" | "elevated";
+  variant?: "default" | "bordered" | "elevated" | "terminal";
   padding?: "none" | "sm" | "md" | "lg";
+  glow?: boolean;
 }
 
 export function Card({
@@ -13,11 +14,13 @@ export function Card({
   className,
   variant = "default",
   padding = "md",
+  glow = false,
 }: CardProps) {
   const variants = {
-    default: "medieval-card bg-gradient-to-b from-fantasy-stone-dark to-fantasy-stone",
-    bordered: "medieval-card bg-gradient-to-b from-fantasy-stone-dark to-fantasy-stone border-4 border-fantasy-gold/40",
-    elevated: "medieval-card bg-gradient-to-b from-fantasy-stone-dark to-fantasy-stone shadow-medieval-lg",
+    default: "cyber-card bg-terminal-panel",
+    bordered: "cyber-card bg-terminal-panel border border-terminal-green/20",
+    elevated: "cyber-card bg-terminal-panel shadow-terminal-lg",
+    terminal: "terminal-panel",
   };
 
   const paddings = {
@@ -27,8 +30,10 @@ export function Card({
     lg: "p-8",
   };
 
+  const glowStyles = glow ? "animate-border-pulse" : "";
+
   return (
-    <div className={clsx("rounded-lg", variants[variant], paddings[padding], className)}>
+    <div className={clsx("rounded-lg", variants[variant], paddings[padding], glowStyles, className)}>
       {children}
     </div>
   );
@@ -40,16 +45,25 @@ interface CardHeaderProps {
 }
 
 export function CardHeader({ children, className }: CardHeaderProps) {
-  return <div className={clsx("mb-4", className)}>{children}</div>;
+  return (
+    <div className={clsx("mb-4 pb-3 border-b border-terminal-green/10", className)}>
+      {children}
+    </div>
+  );
 }
 
 interface CardTitleProps {
   children: ReactNode;
   className?: string;
+  variant?: "default" | "glow";
 }
 
-export function CardTitle({ children, className }: CardTitleProps) {
-  return <h3 className={clsx("text-xl font-bold text-fantasy-gold font-fantasy", className)}>{children}</h3>;
+export function CardTitle({ children, className, variant = "default" }: CardTitleProps) {
+  const titleStyles = variant === "glow"
+    ? "text-xl font-bold text-terminal-green font-mono neon-text"
+    : "text-xl font-bold text-terminal-green font-mono";
+
+  return <h3 className={clsx(titleStyles, className)}>{children}</h3>;
 }
 
 interface CardContentProps {
@@ -58,5 +72,39 @@ interface CardContentProps {
 }
 
 export function CardContent({ children, className }: CardContentProps) {
-  return <div className={clsx("text-fantasy-parchment", className)}>{children}</div>;
+  return <div className={clsx("text-terminal-white/80 font-mono", className)}>{children}</div>;
+}
+
+// Terminal-style card with header dots
+export function TerminalCard({
+  children,
+  title,
+  className,
+  padding = "md",
+}: {
+  children: ReactNode;
+  title?: string;
+  className?: string;
+  padding?: "none" | "sm" | "md" | "lg";
+}) {
+  const paddings = {
+    none: "",
+    sm: "p-3",
+    md: "p-4",
+    lg: "p-6",
+  };
+
+  return (
+    <div className={clsx("terminal-panel rounded-lg overflow-hidden", className)}>
+      <div className="terminal-header">
+        <div className="terminal-header-dot red" />
+        <div className="terminal-header-dot yellow" />
+        <div className="terminal-header-dot green" />
+        {title && (
+          <span className="ml-3 text-sm text-terminal-gray font-mono">{title}</span>
+        )}
+      </div>
+      <div className={clsx(paddings[padding])}>{children}</div>
+    </div>
+  );
 }
