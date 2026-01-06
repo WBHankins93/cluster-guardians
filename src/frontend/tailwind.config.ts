@@ -11,49 +11,105 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Medieval fantasy tech palette
-        k8s: {
-          blue: "#6B46C1",        // Mystical purple-blue
-          "blue-dark": "#4C1D95", // Deep royal purple
-          "blue-light": "#8B5CF6", // Bright magical purple
-        },
-        // Fantasy-themed pod status colors
-        pod: {
-          running: "#10B981",     // Emerald green (healthy magic)
-          pending: "#F59E0B",     // Amber gold (waiting)
-          crash: "#DC2626",      // Crimson red (corruption)
-          image: "#9333EA",      // Royal purple (mystical)
-        },
-        // Medieval terminal styling
+        // Terminal/Hacker color palette
         terminal: {
-          bg: "#1C1917",         // Dark stone
-          fg: "#D4AF37",         // Gold text (ancient script)
-          accent: "#8B5CF6",     // Magical purple
+          black: "#0a0a0a",
+          dark: "#0d1117",
+          bg: "#0a0e14",
+          panel: "#141b22",
+          border: "#1f2937",
+          green: "#00ff41",
+          "green-dim": "#00cc33",
+          "green-bright": "#39ff14",
+          cyan: "#00d4ff",
+          "cyan-dim": "#00a8cc",
+          blue: "#0088ff",
+          purple: "#a855f7",
+          amber: "#f59e0b",
+          red: "#ff3333",
+          white: "#e5e5e5",
+          gray: "#6b7280",
         },
-        // Fantasy UI colors
-        fantasy: {
-          gold: "#D4AF37",       // Ancient gold
-          "gold-light": "#F4D03F",
-          bronze: "#CD7F32",     // Aged bronze
-          stone: "#78716C",      // Stone gray
-          "stone-dark": "#3C3633",
-          parchment: "#F5E6D3",  // Parchment beige
-          "parchment-dark": "#E8D5B7",
-          rune: "#6B46C1",       // Rune blue-purple
-          crystal: "#8B5CF6",    // Crystal purple
+        // Pod status colors (cyber theme)
+        pod: {
+          running: "#00ff41",      // Matrix green
+          pending: "#f59e0b",      // Amber warning
+          crash: "#ff3333",        // Error red
+          image: "#a855f7",        // Purple
+        },
+        // Cluster/Guardian colors
+        cluster: {
+          node: "#00d4ff",         // Cyan nodes
+          pod: "#00ff41",          // Green pods
+          service: "#0088ff",      // Blue services
+          deployment: "#a855f7",   // Purple deployments
         },
       },
       fontFamily: {
-        mono: ["var(--font-mono)", "monospace"],
-        game: ["var(--font-game)", "sans-serif"],
-        serif: ["Georgia", "Times New Roman", "serif"],
-        fantasy: ["Cinzel", "Georgia", "serif"],
+        mono: ["'JetBrains Mono'", "'Fira Code'", "Consolas", "monospace"],
+        terminal: ["'VT323'", "'Share Tech Mono'", "monospace"],
+        display: ["'Orbitron'", "'Rajdhani'", "sans-serif"],
       },
       boxShadow: {
-        'medieval': '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)',
-        'medieval-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)',
-        'glow': '0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.3)',
-        'glow-gold': '0 0 10px rgba(212, 175, 55, 0.5), 0 0 20px rgba(212, 175, 55, 0.3)',
+        'terminal': '0 0 20px rgba(0, 255, 65, 0.15)',
+        'terminal-lg': '0 0 40px rgba(0, 255, 65, 0.2)',
+        'glow-green': '0 0 10px rgba(0, 255, 65, 0.5), 0 0 20px rgba(0, 255, 65, 0.3), 0 0 30px rgba(0, 255, 65, 0.1)',
+        'glow-cyan': '0 0 10px rgba(0, 212, 255, 0.5), 0 0 20px rgba(0, 212, 255, 0.3)',
+        'glow-red': '0 0 10px rgba(255, 51, 51, 0.5), 0 0 20px rgba(255, 51, 51, 0.3)',
+        'inner-glow': 'inset 0 0 20px rgba(0, 255, 65, 0.1)',
+      },
+      animation: {
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'scanline': 'scanline 8s linear infinite',
+        'flicker': 'flicker 0.15s infinite',
+        'glitch': 'glitch 2s infinite',
+        'glow': 'glow 2s ease-in-out infinite alternate',
+        'typing': 'typing 3.5s steps(40, end)',
+        'blink': 'blink 1s step-end infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'matrix-rain': 'matrix-rain 20s linear infinite',
+      },
+      keyframes: {
+        scanline: {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(100vh)' },
+        },
+        flicker: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.8' },
+        },
+        glitch: {
+          '0%, 100%': { transform: 'translate(0)' },
+          '20%': { transform: 'translate(-2px, 2px)' },
+          '40%': { transform: 'translate(-2px, -2px)' },
+          '60%': { transform: 'translate(2px, 2px)' },
+          '80%': { transform: 'translate(2px, -2px)' },
+        },
+        glow: {
+          '0%': { textShadow: '0 0 5px rgba(0, 255, 65, 0.5)' },
+          '100%': { textShadow: '0 0 20px rgba(0, 255, 65, 0.8), 0 0 30px rgba(0, 255, 65, 0.6)' },
+        },
+        typing: {
+          'from': { width: '0' },
+          'to': { width: '100%' },
+        },
+        blink: {
+          '0%, 100%': { borderColor: 'transparent' },
+          '50%': { borderColor: '#00ff41' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        'matrix-rain': {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(100%)' },
+        },
+      },
+      backgroundImage: {
+        'grid-pattern': 'linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px)',
+        'circuit': 'url("/images/circuit-pattern.svg")',
+        'hex-pattern': 'url("/images/hex-pattern.svg")',
       },
     },
   },

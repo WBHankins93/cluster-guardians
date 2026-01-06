@@ -19,10 +19,10 @@ export function Tooltip({ content, children, position = "top" }: TooltipProps) {
   };
 
   const arrowClasses = {
-    top: "top-full left-1/2 -translate-x-1/2 border-t-gray-800 border-l-transparent border-r-transparent border-b-transparent",
-    bottom: "bottom-full left-1/2 -translate-x-1/2 border-b-gray-800 border-l-transparent border-r-transparent border-t-transparent",
-    left: "left-full top-1/2 -translate-y-1/2 border-l-gray-800 border-t-transparent border-b-transparent border-r-transparent",
-    right: "right-full top-1/2 -translate-y-1/2 border-r-gray-800 border-t-transparent border-b-transparent border-l-transparent",
+    top: "top-full left-1/2 -translate-x-1/2 border-t-terminal-panel border-l-transparent border-r-transparent border-b-transparent",
+    bottom: "bottom-full left-1/2 -translate-x-1/2 border-b-terminal-panel border-l-transparent border-r-transparent border-t-transparent",
+    left: "left-full top-1/2 -translate-y-1/2 border-l-terminal-panel border-t-transparent border-b-transparent border-r-transparent",
+    right: "right-full top-1/2 -translate-y-1/2 border-r-terminal-panel border-t-transparent border-b-transparent border-l-transparent",
   };
 
   return (
@@ -34,9 +34,9 @@ export function Tooltip({ content, children, position = "top" }: TooltipProps) {
       {children}
       {isVisible && (
         <div
-          className={`absolute z-50 ${positionClasses[position]} pointer-events-none`}
+          className={`absolute z-50 ${positionClasses[position]} pointer-events-none animate-fade-in`}
         >
-          <div className="bg-gray-800 text-gray-100 text-xs rounded px-2 py-1 shadow-lg border border-gray-700 whitespace-nowrap">
+          <div className="tooltip bg-terminal-panel text-terminal-white text-xs font-mono rounded px-3 py-2 shadow-terminal border border-terminal-green/30 whitespace-nowrap max-w-xs">
             {content}
             <div
               className={`absolute w-0 h-0 border-4 ${arrowClasses[position]}`}
@@ -47,4 +47,3 @@ export function Tooltip({ content, children, position = "top" }: TooltipProps) {
     </div>
   );
 }
-
