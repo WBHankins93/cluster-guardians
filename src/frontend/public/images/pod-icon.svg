@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Pod container -->
+  <rect x="8" y="12" width="48" height="40" rx="4" stroke="#00ff41" stroke-width="2" fill="#00ff41" fill-opacity="0.1"/>
+  <!-- Container sections -->
+  <line x1="8" y1="24" x2="56" y2="24" stroke="#00ff41" stroke-width="1" opacity="0.5"/>
+  <line x1="8" y1="40" x2="56" y2="40" stroke="#00ff41" stroke-width="1" opacity="0.5"/>
+  <!-- Status indicators -->
+  <circle cx="16" cy="18" r="3" fill="#00ff41"/>
+  <circle cx="24" cy="18" r="3" fill="#00d4ff"/>
+  <!-- Container icon -->
+  <rect x="16" y="28" width="12" height="8" rx="1" stroke="#00d4ff" stroke-width="1.5" fill="none"/>
+  <rect x="36" y="28" width="12" height="8" rx="1" stroke="#00d4ff" stroke-width="1.5" fill="none"/>
+  <!-- Bottom details -->
+  <rect x="16" y="44" width="32" height="4" rx="1" fill="#00ff41" fill-opacity="0.3"/>
+</svg>

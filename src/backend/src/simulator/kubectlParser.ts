@@ -93,8 +93,13 @@ export class KubectlParser {
     }
 
     const resourceType = args[0];
-    const resourceName = args[1];
     const namespace = this.extractFlag(args, "-n", "--namespace") || "default";
+
+    // Get resource name (second arg that doesn't start with -)
+    let resourceName: string | undefined;
+    if (args.length > 1 && !args[1].startsWith("-")) {
+      resourceName = args[1];
+    }
 
     const state = this.simulator.getState();
 

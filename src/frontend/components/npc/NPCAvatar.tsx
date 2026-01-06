@@ -7,63 +7,111 @@ interface NPCAvatarProps {
 }
 
 export function NPCAvatar({ type, name, className = "" }: NPCAvatarProps) {
-  const getAvatarEmoji = (type: NPCType): string => {
+  const getAvatarIcon = (type: NPCType): string => {
     switch (type) {
       case "sage":
-        return "🧙";
+        return "◈"; // Diamond - System Admin
       case "pod":
-        return "📦";
+        return "⬡"; // Hexagon - Pod container
       case "deployment":
-        return "⚔️";
+        return "▣"; // Grid - Deployment
       case "service":
-        return "🛡️";
+        return "◉"; // Target - Service endpoint
       case "configmap":
-        return "📜";
+        return "≡"; // Lines - Config
       case "secret":
-        return "🔒";
+        return "◆"; // Diamond filled - Secret
       case "pvc":
-        return "💾";
+        return "▤"; // Storage blocks
       case "node":
-        return "🏔️";
+        return "⬢"; // Hexagon filled - Node
       case "scheduler":
-        return "⚡";
+        return "⚡"; // Lightning - Scheduler
       case "controller":
-        return "🎮";
+        return "⎈"; // Helm wheel - Controller
       default:
-        return "❓";
+        return "?";
     }
   };
 
-  const getTypeColor = (type: NPCType): string => {
+  const getTypeColors = (type: NPCType): { border: string; bg: string; text: string; glow: string } => {
     switch (type) {
       case "sage":
-        return "from-purple-500 to-blue-500";
+        return {
+          border: "border-terminal-cyan",
+          bg: "bg-terminal-cyan/10",
+          text: "text-terminal-cyan",
+          glow: "shadow-glow-cyan",
+        };
       case "pod":
-        return "from-green-500 to-emerald-500";
+        return {
+          border: "border-terminal-green",
+          bg: "bg-terminal-green/10",
+          text: "text-terminal-green",
+          glow: "shadow-glow-green",
+        };
       case "deployment":
-        return "from-blue-500 to-cyan-500";
+        return {
+          border: "border-terminal-purple",
+          bg: "bg-terminal-purple/10",
+          text: "text-terminal-purple",
+          glow: "",
+        };
       case "service":
-        return "from-yellow-500 to-orange-500";
+        return {
+          border: "border-terminal-blue",
+          bg: "bg-terminal-blue/10",
+          text: "text-terminal-blue",
+          glow: "",
+        };
       case "configmap":
-        return "from-gray-500 to-slate-500";
+        return {
+          border: "border-terminal-gray",
+          bg: "bg-terminal-gray/10",
+          text: "text-terminal-gray",
+          glow: "",
+        };
       case "secret":
-        return "from-red-500 to-pink-500";
+        return {
+          border: "border-terminal-red",
+          bg: "bg-terminal-red/10",
+          text: "text-terminal-red",
+          glow: "shadow-glow-red",
+        };
       default:
-        return "from-gray-600 to-gray-700";
+        return {
+          border: "border-terminal-green",
+          bg: "bg-terminal-green/10",
+          text: "text-terminal-green",
+          glow: "",
+        };
     }
   };
+
+  const colors = getTypeColors(type);
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative group ${className}`}>
+      {/* Outer ring with animation */}
+      <div className={`absolute inset-0 rounded-full ${colors.border} border opacity-30 animate-ping`} style={{ animationDuration: '3s' }} />
+
+      {/* Main avatar */}
       <div
-        className={`w-20 h-20 rounded-full bg-gradient-to-br ${getTypeColor(
-          type
-        )} flex items-center justify-center text-4xl shadow-lg border-4 border-gray-700`}
+        className={`relative w-16 h-16 rounded-full ${colors.bg} ${colors.border} border-2 flex items-center justify-center font-mono text-2xl ${colors.glow} transition-all duration-300 group-hover:scale-110`}
       >
-        {getAvatarEmoji(type)}
+        {/* Icon */}
+        <span className={`${colors.text} drop-shadow-lg`}>
+          {getAvatarIcon(type)}
+        </span>
+
+        {/* Inner glow effect */}
+        <div className={`absolute inset-2 rounded-full ${colors.bg} opacity-50 blur-sm`} />
       </div>
-      {/* Pulse effect for interactive NPCs */}
-      <div className="absolute inset-0 rounded-full bg-white opacity-0 hover:opacity-20 transition-opacity cursor-pointer" />
+
+      {/* Status indicator */}
+      <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ${colors.bg} ${colors.border} border flex items-center justify-center`}>
+        <div className={`w-2 h-2 rounded-full bg-terminal-green animate-pulse`} />
+      </div>
     </div>
   );
 }
